@@ -85,6 +85,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem('xpense_token');
     localStorage.removeItem('xpense_user');
+    sessionStorage.clear();
   };
 
   return (

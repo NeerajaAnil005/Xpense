@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ArrowRight, Loader2 } from 'lucide-react';
@@ -10,6 +10,14 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Always reset form credentials on display/mount to prevent stale state after logout
+  useEffect(() => {
+    setEmail('');
+    setPassword('');
+    setError('');
+    setLoading(false);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,6 +44,9 @@ export default function Login() {
       
       // Step 5: On success, token & user state are saved via AuthContext, navigate to Dashboard
       if (res && res.success) {
+        // Reset form state before navigating
+        setEmail('');
+        setPassword('');
         navigate('/dashboard');
       } else {
         setError(res?.message || 'Invalid email or password.');
@@ -122,7 +133,7 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
-              autoComplete="email"
+              autoComplete="username"
             />
           </div>
 
