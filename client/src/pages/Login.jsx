@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogIn, ArrowRight, Zap, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -14,32 +14,37 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
-    try {
-      const res = await login(email, password);
-      if (res.success) {
-        navigate('/dashboard');
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const handleQuickDemo = async () => {
-    setError('');
-    setEmail('demo@xpense.com');
-    setPassword('password123');
+    // Step 1: Validate email
+    if (!email.trim()) {
+      setError('Please enter your email address.');
+      return;
+    }
+
+    // Step 2: Validate password
+    if (!password) {
+      setError('Please enter your password.');
+      return;
+    }
+
+    // Step 3: Only after client validation passes, trigger loading state
     setLoading(true);
+
     try {
-      const res = await login('demo@xpense.com', 'password123');
-      if (res.success) {
+      // Step 4: Send credentials to the existing login API endpoint
+      const res = await login(email.trim(), password);
+      
+      // Step 5: On success, token & user state are saved via AuthContext, navigate to Dashboard
+      if (res && res.success) {
         navigate('/dashboard');
+      } else {
+        setError(res?.message || 'Invalid email or password.');
       }
     } catch (err) {
-      setError('Quick Demo login failed. Please ensure the server seed script has run.');
+      // Step 6: On failed login, display clear error message
+      setError(err.response?.data?.message || 'Invalid email or password.');
     } finally {
+      // Step 7: Always stop the spinner and re-enable button
       setLoading(false);
     }
   };
@@ -55,119 +60,98 @@ export default function Login() {
     }}>
       <div style={{
         width: '100%',
-        maxWidth: '440px',
+        maxWidth: '420px',
         backgroundColor: 'var(--bg-card)',
         border: '1px solid var(--border-color)',
         borderRadius: 'var(--radius-xl)',
-        boxShadow: 'var(--shadow-lg)',
+        boxShadow: 'var(--shadow-md)',
         padding: '2.5rem 2rem'
       }}>
-        {/* Brand Logo Header */}
+        {/* Xpense Logo & Name */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{
-            width: '3.5rem',
-            height: '3.5rem',
-            borderRadius: '1rem',
+            width: '3.25rem',
+            height: '3.25rem',
+            borderRadius: '0.875rem',
             background: 'linear-gradient(135deg, var(--primary), var(--ai-purple))',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#fff',
+            color: '#ffffff',
             fontWeight: 800,
-            fontSize: '1.75rem',
+            fontSize: '1.625rem',
             boxShadow: 'var(--shadow-glow)',
             marginBottom: '1rem'
           }}>
             X
           </div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-            Welcome back to Xpense<span style={{ color: 'var(--ai-purple)' }}>AI</span>
-          </h2>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            Welcome back
+          </h1>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.375rem' }}>
-            Sign in to manage transactions, budgets & AI insights
+            Sign in to your account to continue.
           </p>
         </div>
 
-        {/* Quick Demo Login Banner Button */}
-        <button
-          type="button"
-          onClick={handleQuickDemo}
-          className="btn"
-          style={{
-            width: '100%',
-            marginBottom: '1.5rem',
-            backgroundColor: 'var(--ai-purple-light)',
-            color: 'var(--ai-purple)',
-            border: '1px solid var(--ai-purple)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.5rem',
-            fontWeight: 700
-          }}
-        >
-          <Zap size={18} /> 1-Click Demo Account Login
-        </button>
-
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          margin: '1.25rem 0',
-          color: 'var(--text-muted)',
-          fontSize: '0.75rem'
-        }}>
-          <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }} />
-          <span>or sign in with email</span>
-          <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }} />
-        </div>
-
+        {/* Error Banner */}
         {error && (
           <div style={{
-            padding: '0.75rem',
+            padding: '0.75rem 1rem',
             backgroundColor: 'var(--expense-bg)',
             color: 'var(--expense-red)',
             borderRadius: 'var(--radius-md)',
             marginBottom: '1.25rem',
             fontSize: '0.875rem',
-            textAlign: 'center'
+            fontWeight: 600,
+            textAlign: 'center',
+            border: '1px solid var(--expense-red)'
           }}>
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        {/* Login Form */}
+        <form noValidate onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label">Email Address</label>
+            <label className="form-label" htmlFor="email-input">Email</label>
             <input
+              id="email-input"
               type="email"
               className="form-input"
               placeholder="alex@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
+              disabled={loading}
+              autoComplete="email"
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Password</label>
+            <label className="form-label" htmlFor="password-input">Password</label>
             <input
+              id="password-input"
               type="password"
               className="form-input"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              disabled={loading}
+              autoComplete="current-password"
             />
           </div>
 
           <button
             type="submit"
             className="btn btn-primary"
-            style={{ width: '100%', marginTop: '0.75rem' }}
+            style={{ width: '100%', marginTop: '0.75rem', padding: '0.75rem 1rem' }}
             disabled={loading}
           >
-            {loading ? 'Signing in...' : (
+            {loading ? (
+              <>
+                <Loader2 className="spinner" size={18} />
+                <span>Signing in...</span>
+              </>
+            ) : (
               <>
                 <span>Sign In</span>
                 <ArrowRight size={18} />
@@ -176,10 +160,11 @@ export default function Login() {
           </button>
         </form>
 
+        {/* Register Footer Link */}
         <div style={{ textAlign: 'center', marginTop: '1.75rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
           Don't have an account?{' '}
           <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 700 }}>
-            Create Account
+            Create account
           </Link>
         </div>
       </div>

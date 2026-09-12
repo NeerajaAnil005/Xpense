@@ -1,7 +1,21 @@
 import axios from 'axios';
 
+// Centralized API Base URL Configuration
+const getBaseURL = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl) return '/api';
+  
+  // Clean trailing slash
+  const cleanUrl = envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
+  
+  // If envUrl already ends with /api, return cleanUrl, otherwise append /api
+  return cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+};
+
+export const API_BASE_URL = getBaseURL();
+
 const API = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -47,7 +61,8 @@ export const transactionService = {
   update: (id, data) => API.put(`/transactions/${id}`, data),
   delete: (id) => API.delete(`/transactions/${id}`),
   getSummaryStats: () => API.get('/transactions/summary/stats'),
-  exportCSVUrl: () => '/api/transactions/export/csv'
+  exportCSV: () => API.get('/transactions/export/csv', { responseType: 'blob' }),
+  exportCSVUrl: () => `${API_BASE_URL}/transactions/export/csv`
 };
 
 // Budget Services

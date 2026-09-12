@@ -32,8 +32,8 @@ export default function Navbar({ toggleMobileSidebar, openAIReport }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <button
           onClick={toggleMobileSidebar}
-          className="btn btn-secondary btn-sm"
-          style={{ display: 'flex', alignItems: 'center', padding: '0.5rem' }}
+          className="btn btn-secondary btn-sm mobile-only-toggle"
+          style={{ alignItems: 'center', padding: '0.5rem' }}
           aria-label="Toggle Navigation Menu"
         >
           <Menu size={20} />

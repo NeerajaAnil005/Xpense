@@ -107,8 +107,19 @@ export default function Transactions() {
     }
   };
 
-  const handleExportCSV = () => {
-    window.open(transactionService.exportCSVUrl(), '_blank');
+  const handleExportCSV = async () => {
+    try {
+      const response = await transactionService.exportCSV();
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `xpense_transactions_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error('Failed to export CSV:', err);
+    }
   };
 
   const currency = user?.currency || 'INR';

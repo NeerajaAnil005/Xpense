@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { UserPlus, ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -17,8 +17,13 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+    if (!name.trim()) {
+      setError('Please enter your full name.');
+      return;
+    }
+
+    if (!email.trim()) {
+      setError('Please enter your email address.');
       return;
     }
 
@@ -27,14 +32,21 @@ export default function Register() {
       return;
     }
 
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
     setLoading(true);
     try {
-      const res = await register(name, email, password, confirmPassword);
-      if (res.success) {
+      const res = await register(name.trim(), email.trim(), password, confirmPassword);
+      if (res && res.success) {
         navigate('/dashboard');
+      } else {
+        setError(res?.message || 'Registration failed. Please try again.');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(err.response?.data?.message || 'Registration failed. Email may already be registered.');
     } finally {
       setLoading(false);
     }
@@ -55,104 +67,122 @@ export default function Register() {
         backgroundColor: 'var(--bg-card)',
         border: '1px solid var(--border-color)',
         borderRadius: 'var(--radius-xl)',
-        boxShadow: 'var(--shadow-lg)',
+        boxShadow: 'var(--shadow-md)',
         padding: '2.5rem 2rem'
       }}>
+        {/* Top Branding Header */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{
-            width: '3.5rem',
-            height: '3.5rem',
-            borderRadius: '1rem',
+            width: '3.25rem',
+            height: '3.25rem',
+            borderRadius: '0.875rem',
             background: 'linear-gradient(135deg, var(--primary), var(--ai-purple))',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#fff',
+            color: '#ffffff',
             fontWeight: 800,
-            fontSize: '1.75rem',
+            fontSize: '1.625rem',
             boxShadow: 'var(--shadow-glow)',
             marginBottom: '1rem'
           }}>
             X
           </div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-            Create Your Account
-          </h2>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            Create an Account
+          </h1>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.375rem' }}>
-            Start tracking expenses & optimizing budgets with AI
+            Sign up to start tracking expenses & AI insights
           </p>
         </div>
 
+        {/* Error Alert Message */}
         {error && (
           <div style={{
-            padding: '0.75rem',
+            padding: '0.75rem 1rem',
             backgroundColor: 'var(--expense-bg)',
             color: 'var(--expense-red)',
             borderRadius: 'var(--radius-md)',
             marginBottom: '1.25rem',
             fontSize: '0.875rem',
-            textAlign: 'center'
+            fontWeight: 600,
+            textAlign: 'center',
+            border: '1px solid var(--expense-red)'
           }}>
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        {/* Register Form */}
+        <form noValidate onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label">Full Name</label>
+            <label className="form-label" htmlFor="register-name">Full Name</label>
             <input
+              id="register-name"
               type="text"
               className="form-input"
               placeholder="Alex Morgan"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              required
+              disabled={loading}
+              autoComplete="name"
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Email Address</label>
+            <label className="form-label" htmlFor="register-email">Email</label>
             <input
+              id="register-email"
               type="email"
               className="form-input"
               placeholder="alex@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
+              disabled={loading}
+              autoComplete="email"
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Password</label>
+            <label className="form-label" htmlFor="register-password">Password</label>
             <input
+              id="register-password"
               type="password"
               className="form-input"
               placeholder="At least 6 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              disabled={loading}
+              autoComplete="new-password"
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Confirm Password</label>
+            <label className="form-label" htmlFor="register-confirm">Confirm Password</label>
             <input
+              id="register-confirm"
               type="password"
               className="form-input"
               placeholder="Re-enter password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              required
+              disabled={loading}
+              autoComplete="new-password"
             />
           </div>
 
           <button
             type="submit"
             className="btn btn-primary"
-            style={{ width: '100%', marginTop: '1rem' }}
+            style={{ width: '100%', marginTop: '0.75rem', padding: '0.75rem 1rem' }}
             disabled={loading}
           >
-            {loading ? 'Creating Account...' : (
+            {loading ? (
+              <>
+                <Loader2 className="spinner" size={18} />
+                <span>Creating Account...</span>
+              </>
+            ) : (
               <>
                 <span>Create Account</span>
                 <ArrowRight size={18} />
@@ -161,10 +191,11 @@ export default function Register() {
           </button>
         </form>
 
+        {/* Footer Navigation */}
         <div style={{ textAlign: 'center', marginTop: '1.75rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
           Already have an account?{' '}
           <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 700 }}>
-            Sign In
+            Sign in
           </Link>
         </div>
       </div>

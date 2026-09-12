@@ -149,16 +149,28 @@ Open `http://localhost:3000` in your browser and click **⚡ 1-Click Demo Accoun
 
 ---
 
-## Production Build
+## Render Frontend Deployment (Render Static Site)
 
-To build the frontend for production deployment:
+To deploy the React frontend on Render as a Static Site:
 
-```bash
-cd client
-npm run build
-```
+1. **New Static Site on Render**:
+   - **Name**: `xpense-frontend`
+   - **Root Directory**: `client` (or root if using root scripts)
+   - **Build Command**: `npm run build`
+   - **Publish Directory**: `dist` (or `client/dist`)
 
-The static bundle will be generated in `client/dist/`.
+2. **Environment Variables**:
+   Add the environment variable in Render Dashboard under **Environment**:
+   ```
+   VITE_API_URL=https://xpense-nk8g.onrender.com
+   ```
+
+3. **SPA Redirect / Rewrite Rule**:
+   Add a Redirect / Rewrite rule under **Redirects/Rewrites**:
+   - **Source**: `/*`
+   - **Destination**: `/index.html`
+   - **Action**: `Rewrite`
+   *(Note: The included `client/public/_redirects` and `render.yaml` automatically handle this configuration for Render).*
 
 ---
 

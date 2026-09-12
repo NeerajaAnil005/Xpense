@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: xpense-app
+    env: node
+    rootDir: .
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: VITE_API_URL
+        value: https://xpense-nk8g.onrender.com

@@ -36,8 +36,31 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/notifications', notificationRoutes);
 
-// Root route redirect/info page
-app.get('/', (req, res) => {
+const fs = require('fs');
+const clientDistPath = path.join(__dirname, '../client/dist');
+
+// Serve static frontend assets if built
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+}
+
+// Healthcheck route
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'online',
+    system: 'P12 Expense Management System',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Serve frontend SPA or fallback info page
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  if (fs.existsSync(clientDistPath)) {
+    return res.sendFile(path.join(clientDistPath, 'index.html'));
+  }
   res.send(`
     <!DOCTYPE html>
     <html>
@@ -48,29 +71,19 @@ app.get('/', (req, res) => {
           .card { background: #1e293b; padding: 2.5rem; border-radius: 1rem; text-align: center; max-width: 480px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
           h2 { color: #818cf8; margin-top: 0; }
           p { color: #94a3b8; line-height: 1.6; }
-          .btn { display: inline-block; background: #4f46e5; color: #fff; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 0.5rem; font-weight: bold; margin-top: 1rem; }
-          .btn:hover { background: #4338ca; }
+          .status { display: inline-block; background: #10b981; color: #047857; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: bold; font-size: 0.875rem; margin-bottom: 1rem; }
         </style>
       </head>
       <body>
         <div class="card">
-          <h2>⚡ Xpense AI Backend API Server</h2>
-          <p>You are viewing the backend REST API server running on <strong>Port 5000</strong>.</p>
-          <p>To view and interact with the full web application interface, please open the frontend client at <strong>Port 3000</strong>.</p>
-          <a href="http://localhost:3000" class="btn">👉 Open Frontend UI (http://localhost:3000)</a>
+          <h2>⚡ Xpense AI API Server</h2>
+          <div style="margin-bottom: 1rem;"><span style="background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: bold; font-size: 0.875rem;">● API Online</span></div>
+          <p>The REST API backend is fully operational and ready to process requests.</p>
+          <p style="font-size: 0.8125rem; color: #64748b; margin-top: 1.5rem;">API Health Endpoint: <code>/api/health</code></p>
         </div>
       </body>
     </html>
   `);
-});
-
-// Healthcheck route
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'online',
-    system: 'P12 Expense Management System',
-    timestamp: new Date().toISOString()
-  });
 });
 
 // Error handling middleware
