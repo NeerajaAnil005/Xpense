@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ArrowRight, Loader2 } from 'lucide-react';
 
@@ -10,14 +10,15 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Always reset form credentials on display/mount to prevent stale state after logout
+  // Reset all form state on location/route change or component display
   useEffect(() => {
     setEmail('');
     setPassword('');
     setError('');
     setLoading(false);
-  }, []);
+  }, [location.pathname, location.key]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,7 +45,6 @@ export default function Login() {
       
       // Step 5: On success, token & user state are saved via AuthContext, navigate to Dashboard
       if (res && res.success) {
-        // Reset form state before navigating
         setEmail('');
         setPassword('');
         navigate('/dashboard');
@@ -121,8 +121,8 @@ export default function Login() {
           </div>
         )}
 
-        {/* Login Form */}
-        <form noValidate onSubmit={handleSubmit}>
+        {/* Login Form with unique location key to ensure fresh DOM node */}
+        <form key={location.key || 'login-form'} noValidate onSubmit={handleSubmit} autoComplete="off">
           <div className="form-group">
             <label className="form-label" htmlFor="email-input">Email</label>
             <input
@@ -133,7 +133,7 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
-              autoComplete="username"
+              autoComplete="off"
             />
           </div>
 
@@ -147,7 +147,7 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
-              autoComplete="current-password"
+              autoComplete="new-password"
             />
           </div>
 
