@@ -6,6 +6,9 @@
 [![SQLite](https://img.shields.io/badge/Database-SQLite-003B57.svg)](https://www.sqlite.org/)
 [![Google Gemini AI](https://img.shields.io/badge/AI-Google%20Gemini-8E44AD.svg)](https://ai.google.dev/)
 
+<p align="center">
+  🚀 <strong><a href="https://xpense-1ebb.onrender.com">Live Demo — Open Xpense</a></strong>
+</p>
 A modern, full-stack, production-ready finance management web application featuring income/expense tracking, budget monitoring with automated alert warnings, interactive visual reports, CSV export, dark mode, and personalized AI spending insights powered by Google Gemini.
 
 ---
